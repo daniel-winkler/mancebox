@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mancebox
 
-## Getting Started
+Aplicación web sencilla para reservar plazas de clases de cross training. Sustituye las encuestas de WhatsApp: una sala activa (una semana), sesiones con cupo de 15 y lista de espera con oferta manual al primero de la cola.
 
-First, run the development server:
+## Cómo se usa
+
+1. Abre la web y guarda **nombre y teléfono** (quedan en este dispositivo).
+2. En **Horarios** reserva plaza o entra en lista de espera si la sesión está llena.
+3. Si alguien cancela, el primero de la espera recibe una **oferta**. Tiene que aceptarla o rechazarla; si rechaza, pasa al siguiente. No hay caducidad automática.
+4. El organizador entra en **Admin** con una contraseña, crea la sala de la semana y añade sesiones (día, hora y lugar). Comparte siempre la misma URL.
+
+En local, si no configuras Turso, se usa un SQLite en `.data/mancebox.db`. La contraseña de admin por defecto es `cross123` (solo en local; en producción `ADMIN_PASSWORD` es obligatoria).
+
+## Desarrollo
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Despliegue gratuito (Netlify + Turso)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Crea una base de datos en [Turso](https://turso.tech) (`turso db create mancebox`) y copia URL y token.
+2. Sube el proyecto a GitHub e impórtalo en [Netlify](https://www.netlify.com) (plan gratuito). Netlify detecta Next.js y usa la configuración de `netlify.toml`.
+3. En Netlify (*Site configuration → Environment variables*), añade las variables:
 
-## Learn More
+   - `TURSO_DATABASE_URL`
+   - `TURSO_AUTH_TOKEN`
+   - `ADMIN_PASSWORD` (obligatoria: sin ella el acceso de administrador queda desactivado)
 
-To learn more about Next.js, take a look at the following resources:
+4. Las tablas se crean solas al primer uso. Comparte la URL de Netlify por WhatsApp.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+En producción Turso es obligatorio: el sistema de archivos de Netlify es de solo lectura, así que el SQLite local no funciona allí.

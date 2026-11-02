@@ -30,12 +30,18 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# local sqlite
+.data/
+
 # env files (can opt-in for committing if needed)
 .env*
 
-# vercel
-.vercel
+# netlify
+.netlify
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code
+CLAUDE.md
