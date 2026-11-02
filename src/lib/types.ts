@@ -41,6 +41,7 @@ export type PublicSlot = Slot & {
   waitlistCount: number;
   offeredCount: number;
   waitlist: WaitlistEntry[];
+  confirmedNames: string[];
   myBooking: MyBooking | null;
 };
 

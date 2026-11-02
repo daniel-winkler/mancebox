@@ -171,6 +171,11 @@ async function loadPublicSlots(ex: Executor, roomId: number, phone: string | nul
       `SELECT name, position FROM bookings WHERE slot_id = ? AND status = 'waitlist' ORDER BY position ASC, id ASC`,
       [slotId],
     );
+    const confirmedRs = await exec(
+      ex,
+      `SELECT name FROM bookings WHERE slot_id = ? AND status = 'confirmed' ORDER BY id ASC`,
+      [slotId],
+    );
     let myBooking = null;
     if (phone) {
       const mine = await exec(
@@ -200,6 +205,7 @@ async function loadPublicSlots(ex: Executor, roomId: number, phone: string | nul
         name: w.name as string,
         position: Number(w.position),
       })),
+      confirmedNames: confirmedRs.rows.map((c) => c.name as string),
       myBooking,
     });
   }
@@ -272,7 +278,7 @@ export async function addSlot(label: string, time: string, place: string) {
     const room = await getActiveRoom(txn);
     if (!room) {
       await txn.rollback();
-      return { error: "No hay una sala activa. Crea una sala primero." as const };
+      return { error: "No hay un plan activo. Crea un plan primero." as const };
     }
     const rs = await exec(
       txn,

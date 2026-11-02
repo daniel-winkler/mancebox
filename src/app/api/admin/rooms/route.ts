@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   const body = await readJson<{ title?: string }>(request);
   const title = (body.title ?? "").trim();
   if (title.length < 3) {
-    return Response.json({ error: "Indica un nombre para la sala (por ejemplo, la semana)." }, { status: 400 });
+    return Response.json({ error: "Indica un nombre para el plan (por ejemplo, la semana)." }, { status: 400 });
   }
   await createRoom(title);
   return Response.json({ admin: true, ...(await getAdminSchedule()) });

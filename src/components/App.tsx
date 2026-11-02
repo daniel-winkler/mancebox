@@ -41,6 +41,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [schedule, setSchedule] = useState<SchedulePayload>({ room: null, slots: [] });
   const [openWait, setOpenWait] = useState<Record<number, boolean>>({});
+  const [openParticipants, setOpenParticipants] = useState<Record<number, boolean>>({});
   const [admin, setAdmin] = useState<AdminPayload>({ admin: false });
   const [password, setPassword] = useState("");
   const [showNewRoom, setShowNewRoom] = useState(false);
@@ -71,7 +72,6 @@ export default function App() {
       setNotice("Completa tu perfil en este dispositivo para poder reservar.");
     } else {
       setTab("schedule");
-      setNotice("Tus datos están guardados en este dispositivo.");
     }
   }, [load]);
 
@@ -183,7 +183,7 @@ export default function App() {
       setRoomTitle("");
       setShowNewRoom(false);
       await load(profile.phone);
-      setNotice("Sala creada y activada. Los usuarios verán esta semana.");
+      setNotice("Plan creado y activado. Los usuarios verán esta semana.");
     });
   }
 
@@ -196,7 +196,7 @@ export default function App() {
       setSlotPlace("");
       setShowNewSlot(false);
       await load(profile.phone);
-      setNotice("Sesión añadida a la sala activa.");
+      setNotice("Sesión añadida al plan activo.");
     });
   }
 
@@ -225,14 +225,13 @@ export default function App() {
     <main className="app">
       <header className="hero">
         <div className="brand">
-          <div className="logo">✣</div>
           <div>
             MANCEBOX
-            <div className="muted-light">COMUNIDAD DE ENTRENAMIENTO</div>
+            <div className="muted-light">COMUNIDAD DE CROSSTRAINING</div>
           </div>
         </div>
         <h1>¡Hola{profile.name ? `, ${profile.name}` : ""}!</h1>
-        <p>Organiza tu semana. Reserva tu entrenamiento.</p>
+        <p>Reserva tu entrenamiento.</p>
         <div className="identity">
           ◉ <span>{profile.phone || "Sin identificar"}</span>
           <button type="button" onClick={() => go("profile")}>
@@ -265,6 +264,8 @@ export default function App() {
             busy={busy}
             openWait={openWait}
             setOpenWait={setOpenWait}
+            openParticipants={openParticipants}
+            setOpenParticipants={setOpenParticipants}
             onJoin={join}
             onCancel={cancel}
             onAccept={accept}
@@ -288,12 +289,11 @@ export default function App() {
             <p className="sub">Estos datos se utilizarán para identificarte al reservar.</p>
             <div className="box">
               <div className="center">
-                <div style={{ fontSize: 30 }}>♙</div>
                 <b>Identificación del participante</b>
                 <p className="small">Perfil guardado en este dispositivo</p>
               </div>
               <label className="field" htmlFor="name">
-                Nombre completo
+                Nombre
               </label>
               <input id="name" value={nameDraft} onChange={(e) => setNameDraft(e.target.value)} required />
               <label className="field" htmlFor="phone">
@@ -343,10 +343,9 @@ export default function App() {
           ) : (
             <form onSubmit={login}>
               <div className="center">
-                <div style={{ fontSize: 32 }}>⬡</div>
                 <h2>Administración</h2>
                 <p className="sub">
-                  Introduce la contraseña del organizador para gestionar las salas y horarios.
+                  Introduce la contraseña del organizador para gestionar los planes y horarios.
                 </p>
               </div>
               <label className="field" htmlFor="password">
@@ -375,6 +374,8 @@ function SlotCard({
   busy,
   open,
   onToggleWait,
+  openParticipants,
+  onToggleParticipants,
   onJoin,
   onCancel,
   onAccept,
@@ -384,6 +385,8 @@ function SlotCard({
   busy: boolean;
   open: boolean;
   onToggleWait: () => void;
+  openParticipants: boolean;
+  onToggleParticipants: () => void;
   onJoin: () => void;
   onCancel: (waiting: boolean) => void;
   onAccept: () => void;
@@ -458,6 +461,25 @@ function SlotCard({
         </button>
       )}
 
+      {slot.confirmedNames.length > 0 && (
+        <>
+          <button className="link" type="button" onClick={onToggleParticipants}>
+            {openParticipants
+              ? "⌃ Ocultar participantes"
+              : `⌄ Ver participantes (${slot.confirmedNames.length})`}
+          </button>
+          {openParticipants && (
+            <div className="waitlist">
+              {slot.confirmedNames.map((name, i) => (
+                <div className="waititem" key={`${i}-${name}`}>
+                  {i + 1}. {name}
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
       {(slot.waitlistCount > 0 || slot.offeredCount > 0) && (
         <>
           <button className="link" type="button" onClick={onToggleWait}>
@@ -489,6 +511,8 @@ function ScheduleView({
   busy,
   openWait,
   setOpenWait,
+  openParticipants,
+  setOpenParticipants,
   onJoin,
   onCancel,
   onAccept,
@@ -498,6 +522,8 @@ function ScheduleView({
   busy: boolean;
   openWait: Record<number, boolean>;
   setOpenWait: Dispatch<SetStateAction<Record<number, boolean>>>;
+  openParticipants: Record<number, boolean>;
+  setOpenParticipants: Dispatch<SetStateAction<Record<number, boolean>>>;
   onJoin: (slot: PublicSlot) => void;
   onCancel: (slotId: number, waiting: boolean) => void;
   onAccept: (slotId: number) => void;
@@ -509,16 +535,16 @@ function ScheduleView({
       <p className="sub">Selecciona una sesión para reservar tu plaza.</p>
       {schedule.room ? (
         <div className="room">
-          <b>▦ {schedule.room.title}</b>
+          <b>{schedule.room.title}</b>
           <div className="small">
-            Sala activa · {schedule.slots.length}{" "}
+            Plan activo · {schedule.slots.length}{" "}
             {schedule.slots.length === 1 ? "sesión programada" : "sesiones programadas"}
           </div>
         </div>
       ) : (
         <div className="box">
           <p className="small">
-            Todavía no hay una semana publicada. El organizador creará la sala desde Admin.
+            Todavía no hay una semana publicada. El organizador creará el plan desde Admin.
           </p>
         </div>
       )}
@@ -535,6 +561,10 @@ function ScheduleView({
             busy={busy}
             open={Boolean(openWait[slot.id])}
             onToggleWait={() => setOpenWait((prev) => ({ ...prev, [slot.id]: !prev[slot.id] }))}
+            openParticipants={Boolean(openParticipants[slot.id])}
+            onToggleParticipants={() =>
+              setOpenParticipants((prev) => ({ ...prev, [slot.id]: !prev[slot.id] }))
+            }
             onJoin={() => onJoin(slot)}
             onCancel={(waiting) => onCancel(slot.id, waiting)}
             onAccept={() => onAccept(slot.id)}
@@ -565,8 +595,6 @@ function BookingsView({
         <h2>Mis reservas</h2>
         <p className="sub">Tus entrenamientos y solicitudes pendientes.</p>
         <div className="center small">
-          ▦
-          <br />
           <b>Todavía no tienes reservas</b>
           <br />
           Cuando te apuntes a un entrenamiento, aparecerá aquí.
@@ -670,16 +698,28 @@ function AdminView({
   onLogout: () => void;
 }) {
   const slots = admin.slots ?? [];
+  const [confirmReplace, setConfirmReplace] = useState(false);
+
+  // Creating a plan deactivates the current one, so ask before replacing it.
+  function submitRoom(event: FormEvent) {
+    if (admin.room && !confirmReplace) {
+      event.preventDefault();
+      setConfirmReplace(true);
+      return;
+    }
+    onSaveRoom(event);
+  }
+
   return (
     <div>
       <div className="row">
         <h2>Panel de gestión</h2>
         <span className="pill">Organizador</span>
       </div>
-      <p className="sub">Gestiona las salas y las plazas de entrenamiento.</p>
+      <p className="sub">Gestiona los planes y las sesiones de entrenamiento.</p>
       <div className="box">
-        <b>Sala actual</b>
-        <p className="small">{admin.room?.title ?? "Ninguna sala activa"}</p>
+        <b>Plan actual</b>
+        <p className="small">{admin.room?.title ?? "Ningún plan activo"}</p>
         <div className="row small">
           <span>Sesiones programadas</span>
           <b>{totals.count}</b>
@@ -690,24 +730,59 @@ function AdminView({
             {totals.taken}/{totals.cap || 0}
           </b>
         </div>
-        <button className="btn secondary" type="button" onClick={() => setShowNewRoom(!showNewRoom)}>
-          ＋ Crear nueva sala
+        <button
+          className="btn secondary"
+          type="button"
+          onClick={() => {
+            setShowNewRoom(!showNewRoom);
+            setConfirmReplace(false);
+          }}
+        >
+          Crear nuevo plan
         </button>
         {showNewRoom && (
-          <form onSubmit={onSaveRoom}>
+          <form onSubmit={submitRoom}>
             <label className="field" htmlFor="roomInput">
-              Nombre de la sala
+              Nombre del plan
             </label>
             <input
               id="roomInput"
               value={roomTitle}
-              onChange={(e) => setRoomTitle(e.target.value)}
+              onChange={(e) => {
+                setRoomTitle(e.target.value);
+                setConfirmReplace(false);
+              }}
               placeholder="Nombre de la semana"
             />
-            <button className="btn" disabled={busy}>
-              Guardar sala
-            </button>
-            <p className="small">La nueva sala sustituye a la anterior como semana visible.</p>
+            {confirmReplace && admin.room ? (
+              <div className="confirm">
+                <p>
+                  <b>¿Reemplazar el plan «{admin.room.title}»?</b>
+                </p>
+                <p className="small">
+                  Dejará de estar visible junto con sus sesiones y reservas. Esta acción no se puede
+                  deshacer.
+                </p>
+                <button className="btn danger-solid" disabled={busy}>
+                  Sí, reemplazar plan
+                </button>
+                <button
+                  className="btn secondary"
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setConfirmReplace(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <>
+                <button className="btn" disabled={busy}>
+                  Guardar plan
+                </button>
+                <p className="small">El nuevo plan sustituye al anterior como semana visible.</p>
+              </>
+            )}
           </form>
         )}
       </div>
@@ -740,9 +815,9 @@ function AdminView({
             )}
           </div>
         ))}
-        {slots.length === 0 && <p className="small">Aún no hay sesiones en esta sala.</p>}
+        {slots.length === 0 && <p className="small">Aún no hay sesiones en este plan.</p>}
         <button className="btn secondary" type="button" onClick={() => setShowNewSlot(!showNewSlot)}>
-          ＋ Añadir sesión
+          Añadir sesión
         </button>
         {showNewSlot && (
           <form onSubmit={onSaveSlot}>
