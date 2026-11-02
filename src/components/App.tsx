@@ -234,9 +234,6 @@ export default function App() {
         <p>Reserva tu entrenamiento.</p>
         <div className="identity">
           ◉ <span>{profile.phone || "Sin identificar"}</span>
-          <button type="button" onClick={() => go("profile")}>
-            Editar perfil
-          </button>
         </div>
       </header>
 
@@ -297,7 +294,7 @@ export default function App() {
               </label>
               <input id="name" value={nameDraft} onChange={(e) => setNameDraft(e.target.value)} required />
               <label className="field" htmlFor="phone">
-                Número de teléfono
+                Teléfono
               </label>
               <input
                 id="phone"
@@ -483,7 +480,7 @@ function SlotCard({
       {(slot.waitlistCount > 0 || slot.offeredCount > 0) && (
         <>
           <button className="link" type="button" onClick={onToggleWait}>
-            {open ? "⌃ Ocultar lista de espera" : "⌄ Ver lista de espera"}
+            {open ? "Ocultar lista de espera" : "Ver lista de espera"}
           </button>
           {open && (
             <div className="waitlist">

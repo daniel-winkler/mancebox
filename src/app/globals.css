@@ -78,14 +78,6 @@ body {
   font-size: 13px;
 }
 
-.identity button {
-  margin-left: auto;
-  color: var(--mint);
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-
 .nav {
   display: flex;
   gap: 5px;
@@ -315,6 +307,7 @@ input {
   background: none;
   color: #56665b;
   padding: 8px 0;
+  margin-right: 16px;
   cursor: pointer;
   font: inherit;
   font-size: 13px;
