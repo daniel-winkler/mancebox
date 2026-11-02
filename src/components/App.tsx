@@ -465,8 +465,8 @@ function SlotCard({
         <>
           <button className="link" type="button" onClick={onToggleParticipants}>
             {openParticipants
-              ? "⌃ Ocultar participantes"
-              : `⌄ Ver participantes (${slot.confirmedNames.length})`}
+              ? "Ocultar participantes"
+              : `Ver participantes (${slot.confirmedNames.length})`}
           </button>
           {openParticipants && (
             <div className="waitlist">

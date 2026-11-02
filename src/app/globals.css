@@ -1,30 +1,15 @@
 @import "tailwindcss";
 
-/* Palette taken from the Mancebox logo: sunset orange, sea blue, palm green on warm sand. */
 :root {
-  --ink: #1f2a2e;
-  --sun: #f39a4a;
-  --sun-light: #f8c48a;
-  --sun-deep: #e8742c;
-  --sun-soft: #fde9d5;
-  --sun-pale: #f7dcc0;
-  --sun-text: #a24d12;
-  --sea: #17708f;
-  --sea-deep: #0f4c63;
-  --sea-soft: #dcf1f6;
-  --sea-text: #145a73;
-  --palm: #3f8b3c;
-  --palm-soft: #e3f1dc;
-  --palm-text: #2f6b2c;
-  --bg: #fbf5ec;
-  --surface: #fdf9f3;
-  --surface-2: #f6eee2;
-  --muted: #6f6a62;
-  --line: #ecdfcd;
+  --ink: #182b28;
+  --mint: #d5f0b8;
+  --green: #4f9a67;
+  --bg: #f5f7f4;
+  --muted: #68756e;
+  --line: #e1e7e1;
   --card: #fff;
+  --amber: #c58a3e;
   --red: #bd5555;
-  --red-soft: #f8e7e7;
-  --red-text: #a44747;
 }
 
 * {
@@ -40,27 +25,26 @@ body {
 body {
   background: var(--bg);
   font: 15px/1.45 system-ui, -apple-system, Segoe UI, sans-serif;
-  color: var(--ink);
+  color: #202a25;
 }
 
 .app {
   max-width: 720px;
   margin: 24px auto;
-  background: var(--card);
+  background: white;
   border: 1px solid var(--line);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 8px 30px #5a3a1414;
+  box-shadow: 0 8px 30px #15251b12;
   display: flex;
   flex-direction: column;
   min-height: calc(100dvh - 48px);
 }
 
 .hero {
-  background: var(--sun-pale);
-  color: #23140a;
+  background: var(--ink);
+  color: white;
   padding: 22px;
-  border-bottom: 4px solid var(--sea);
 }
 
 .brand {
@@ -72,7 +56,7 @@ body {
 }
 
 .muted-light {
-  color: #5a3517;
+  color: #c5d2ca;
   font-size: 12px;
 }
 
@@ -83,7 +67,7 @@ body {
 
 .hero p {
   margin: 0;
-  color: #4a2a12;
+  color: #d0ddd6;
 }
 
 .identity {
@@ -96,8 +80,7 @@ body {
 
 .identity button {
   margin-left: auto;
-  color: var(--sea-deep);
-  font-weight: 700;
+  color: var(--mint);
   background: none;
   border: 0;
   cursor: pointer;
@@ -107,23 +90,23 @@ body {
   display: flex;
   gap: 5px;
   padding: 10px;
-  background: var(--surface);
+  background: #fafbf9;
 }
 
 .nav button {
   flex: 1;
   border: 0;
-  background: var(--surface-2);
+  background: #eef1ed;
   padding: 10px 4px;
   border-radius: 10px;
-  color: var(--muted);
+  color: #657168;
   cursor: pointer;
   font-size: 13px;
 }
 
 .nav button.active {
-  background: var(--sea-soft);
-  color: var(--sea-text);
+  background: #dceed2;
+  color: #284d32;
   font-weight: 700;
 }
 
@@ -133,17 +116,17 @@ body {
 }
 
 .notice {
-  background: var(--sea-soft);
+  background: #f0f3ef;
   padding: 10px 12px;
   border-radius: 9px;
-  color: var(--sea-text);
+  color: #5e6a62;
   font-size: 13px;
   margin-bottom: 15px;
 }
 
 .notice.error {
-  background: var(--red-soft);
-  color: var(--red-text);
+  background: #f8e7e7;
+  color: #a44747;
 }
 
 .notice.empty {
@@ -167,7 +150,7 @@ h3 {
 }
 
 .room {
-  background: var(--sun-soft);
+  background: #f0f3ef;
   border-radius: 12px;
   padding: 14px;
   margin: 16px 0;
@@ -190,7 +173,6 @@ h3 {
 .time {
   font-size: 27px;
   font-weight: 750;
-  color: var(--sea-deep);
 }
 
 .place,
@@ -207,7 +189,7 @@ h3 {
 .bar {
   height: 7px;
   border-radius: 20px;
-  background: var(--surface-2);
+  background: #e9eee8;
   overflow: hidden;
   margin: 12px 0;
 }
@@ -215,11 +197,11 @@ h3 {
 .bar span {
   display: block;
   height: 100%;
-  background: var(--palm);
+  background: var(--green);
 }
 
 .bar.full span {
-  background: var(--sun-deep);
+  background: var(--amber);
 }
 
 .pill {
@@ -228,25 +210,25 @@ h3 {
   border-radius: 20px;
   font-size: 11px;
   font-weight: 700;
-  background: var(--palm-soft);
-  color: var(--palm-text);
+  background: #e4f2e6;
+  color: #36744a;
 }
 
 .pill.full {
-  background: var(--red-soft);
-  color: var(--red-text);
+  background: #f8e7e7;
+  color: #a44747;
 }
 
 .pill.wait {
-  background: var(--sun-soft);
-  color: var(--sun-text);
+  background: #fff1db;
+  color: #95611d;
 }
 
 .btn {
   border: 0;
   border-radius: 9px;
   padding: 11px 14px;
-  background: var(--sea);
+  background: var(--ink);
   color: white;
   font-weight: 650;
   cursor: pointer;
@@ -254,40 +236,24 @@ h3 {
   margin-top: 8px;
 }
 
-.btn:hover:not(:disabled) {
-  background: var(--sea-deep);
-}
-
 .btn.secondary {
-  background: var(--card);
+  background: white;
   border: 1px solid var(--line);
-  color: var(--sea-text);
-}
-
-.btn.secondary:hover:not(:disabled) {
-  background: var(--sea-soft);
+  color: #39463e;
 }
 
 .btn.danger {
-  background: var(--card);
+  background: white;
   border: 1px solid #e5bcbc;
-  color: var(--red-text);
-}
-
-.btn.danger:hover:not(:disabled) {
-  background: var(--red-soft);
+  color: #a44747;
 }
 
 .btn.danger-solid {
   background: var(--red);
 }
 
-.btn.danger-solid:hover:not(:disabled) {
-  background: var(--red-text);
-}
-
 .confirm {
-  background: var(--red-soft);
+  background: #f8e7e7;
   border-radius: 9px;
   padding: 12px;
   margin-top: 12px;
@@ -319,16 +285,11 @@ h3 {
 input {
   width: 100%;
   padding: 11px;
-  border: 1px solid var(--line);
+  border: 1px solid #d8dfd8;
   border-radius: 9px;
   font: inherit;
-  background: var(--card);
+  background: white;
   color: inherit;
-}
-
-input:focus {
-  outline: 2px solid var(--sea);
-  outline-offset: 1px;
 }
 
 .stack {
@@ -343,8 +304,8 @@ input:focus {
 
 .footer {
   text-align: center;
-  background: var(--sea-deep);
-  color: var(--sea-soft);
+  background: #f0f3ef;
+  color: #778179;
   font-size: 11px;
   padding: 15px;
 }
@@ -352,7 +313,7 @@ input:focus {
 .link {
   border: 0;
   background: none;
-  color: var(--sea-text);
+  color: #56665b;
   padding: 8px 0;
   cursor: pointer;
   font: inherit;
@@ -360,7 +321,7 @@ input:focus {
 }
 
 .waitlist {
-  background: var(--surface-2);
+  background: #f3f5f2;
   border-radius: 9px;
   padding: 12px;
   margin-top: 10px;
@@ -376,7 +337,7 @@ input:focus {
 .people {
   font-size: 13px;
   margin: 8px 0 0;
-  color: var(--ink);
+  color: #3d4b44;
 }
 
 @media (max-width: 600px) {
