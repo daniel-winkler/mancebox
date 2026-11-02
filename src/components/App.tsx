@@ -19,9 +19,7 @@ import {
 import { hasProfile, loadProfile, saveProfile, type Profile } from "@/lib/profile";
 import type { AdminSlot, PublicSlot } from "@/lib/types";
 
-type Tab = "schedule" | "bookings" | "admin" | "profile";
-
-const ordinals = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳"];
+type Tab = "schedule" | "bookings" | "profile";
 
 function occupied(slot: PublicSlot) {
   return slot.confirmedCount + slot.offeredCount;
@@ -33,6 +31,7 @@ function isFull(slot: PublicSlot) {
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("profile");
+  const [adminMode, setAdminMode] = useState(false);
   const [profile, setProfile] = useState<Profile>({ name: "", phone: "" });
   const [nameDraft, setNameDraft] = useState("");
   const [phoneDraft, setPhoneDraft] = useState("");
@@ -92,6 +91,12 @@ export default function App() {
     if (next === "profile" && !ready) {
       setNotice("Completa tu perfil en este dispositivo para poder reservar.");
     }
+  }
+
+  function switchMode(toAdmin: boolean) {
+    setAdminMode(toAdmin);
+    setNotice("");
+    setError("");
   }
 
   function needProfile() {
@@ -170,6 +175,7 @@ export default function App() {
     await withBusy(async () => {
       await adminLogout();
       setAdmin({ admin: false });
+      setAdminMode(false);
       setTab("schedule");
       setNotice("Has salido del panel de administración.");
     });
@@ -223,39 +229,53 @@ export default function App() {
 
   return (
     <main className="app">
-      <header className="hero">
-        <div className="brand">
+      {adminMode ? (
+        <header className="admin-bar">
           <div>
-            MANCEBOX
-            <div className="muted-light">COMUNIDAD DE CROSSTRAINING</div>
+            <b>Panel del organizador</b>
+            <div className="small">MANCEBOX</div>
           </div>
-        </div>
-        <h1>¡Hola{profile.name ? `, ${profile.name}` : ""}!</h1>
-        <p>Reserva tu entrenamiento.</p>
-        <div className="identity">
-          ◉ <span>{profile.phone || "Sin identificar"}</span>
-        </div>
-      </header>
+          <button type="button" className="btn secondary" onClick={() => switchMode(false)}>
+            ← Volver a reservas
+          </button>
+        </header>
+      ) : (
+        <>
+          <header className="hero">
+            <div className="brand">
+              <div>
+                MANCEBOX
+                <div className="muted-light">COMUNIDAD DE CROSSTRAINING</div>
+              </div>
+              <button type="button" className="hero-admin" onClick={() => switchMode(true)}>
+                ⚙ Organizador
+              </button>
+            </div>
+            <h1>¡Hola{profile.name ? `, ${profile.name}` : ""}!</h1>
+            <p>Reserva tu entrenamiento.</p>
+            <div className="identity">
+              ◉ <span>{profile.phone || "Sin identificar"}</span>
+            </div>
+          </header>
 
-      <nav className="nav">
-        <button type="button" className={tab === "schedule" ? "active" : ""} onClick={() => go("schedule")}>
-          ▦ Horarios
-        </button>
-        <button type="button" className={tab === "bookings" ? "active" : ""} onClick={() => go("bookings")}>
-          ▣ Mis reservas
-        </button>
-        <button type="button" className={tab === "admin" ? "active" : ""} onClick={() => go("admin")}>
-          ⚙ Admin
-        </button>
-        <button type="button" className={tab === "profile" ? "active" : ""} onClick={() => go("profile")}>
-          ♙ Perfil
-        </button>
-      </nav>
+          <nav className="nav">
+            <button type="button" className={tab === "schedule" ? "active" : ""} onClick={() => go("schedule")}>
+              ▦ Horarios
+            </button>
+            <button type="button" className={tab === "bookings" ? "active" : ""} onClick={() => go("bookings")}>
+              {"☑︎"} Mis reservas
+            </button>
+            <button type="button" className={tab === "profile" ? "active" : ""} onClick={() => go("profile")}>
+              ♙ Perfil
+            </button>
+          </nav>
+        </>
+      )}
 
       <section className="content">
         <div className={`notice${error ? " error" : notice ? "" : " empty"}`}>{error || notice}</div>
 
-        {tab === "schedule" && (
+        {!adminMode && tab === "schedule" && (
           <ScheduleView
             schedule={schedule}
             busy={busy}
@@ -270,7 +290,7 @@ export default function App() {
           />
         )}
 
-        {tab === "bookings" && (
+        {!adminMode && tab === "bookings" && (
           <BookingsView
             slots={myBookings}
             busy={busy}
@@ -280,7 +300,7 @@ export default function App() {
           />
         )}
 
-        {tab === "profile" && (
+        {!adminMode && tab === "profile" && (
           <form onSubmit={persistProfile}>
             <h2>Tu perfil</h2>
             <p className="sub">Estos datos se utilizarán para identificarte al reservar.</p>
@@ -314,7 +334,7 @@ export default function App() {
           </form>
         )}
 
-        {tab === "admin" &&
+        {adminMode &&
           (admin.admin ? (
             <AdminView
               admin={admin}
@@ -466,10 +486,10 @@ function SlotCard({
               : `Ver participantes (${slot.confirmedNames.length})`}
           </button>
           {openParticipants && (
-            <div className="waitlist">
+            <div className="waitlist participants">
               {slot.confirmedNames.map((name, i) => (
                 <div className="waititem" key={`${i}-${name}`}>
-                  {i + 1}. {name}
+                  {name}
                 </div>
               ))}
             </div>
@@ -487,11 +507,13 @@ function SlotCard({
               {slot.offeredCount > 0 && (
                 <div className="waititem">Oferta pendiente: {slot.offeredCount}</div>
               )}
-              {slot.waitlist.map((item) => (
-                <div className="waititem" key={`${item.position}-${item.name}`}>
-                  {ordinals[item.position - 1] ?? `${item.position}.`} {item.name}
-                </div>
-              ))}
+              {slot.waitlist.length > 0 && (
+                <ol className="waitorder">
+                  {slot.waitlist.map((item) => (
+                    <li key={`${item.position}-${item.name}`}>{item.name}</li>
+                  ))}
+                </ol>
+              )}
               {slot.waitlist.length === 0 && slot.offeredCount === 0 && (
                 <div className="small">Nadie en espera.</div>
               )}
@@ -800,7 +822,7 @@ function AdminView({
                 <p className="people">
                   Oferta pendiente: {slot.offered.map((p) => `${p.name} (${p.phone})`).join(", ")}
                 </p>
-                <button className="btn secondary" type="button" disabled={busy} onClick={() => onPassOffer(slot.id)}>
+                <button className="btn secondary small-btn" type="button" disabled={busy} onClick={() => onPassOffer(slot.id)}>
                   Pasar oferta al siguiente
                 </button>
               </>
