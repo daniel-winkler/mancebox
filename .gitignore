@@ -36,8 +36,6 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
-# netlify
-.netlify
 
 # typescript
 *.tsbuildinfo
@@ -45,3 +43,7 @@ next-env.d.ts
 
 # claude code
 CLAUDE.md
+AGENTS.md
+
+# dev notes
+DEVLOG.md

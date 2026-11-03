@@ -6,7 +6,7 @@ const COOKIE = "mancebox_admin";
 // The "cross123" default is public (README), so it is only allowed outside production.
 export function getAdminPassword(): string | null {
   if (process.env.ADMIN_PASSWORD) return process.env.ADMIN_PASSWORD;
-  if (process.env.NETLIFY || process.env.NODE_ENV === "production") return null;
+  if (process.env.NODE_ENV === "production") return null;
   return "cross123";
 }
 

@@ -13,15 +13,15 @@ let schemaReady: Promise<void> | null = null;
 function getClient(): Client {
   if (client) return client;
 
-  const url = process.env.TURSO_DATABASE_URL;
-  const authToken = process.env.TURSO_AUTH_TOKEN;
+  const url = process.env.DATABASE_URL;
+  const authToken = process.env.DATABASE_AUTH_TOKEN;
 
   if (url) {
     client = createClient({ url, authToken });
   } else {
-    // Serverless hosts (Netlify) have a read-only filesystem, so the local SQLite fallback can't work there.
-    if (process.env.NETLIFY || process.env.NODE_ENV === "production") {
-      throw new Error("TURSO_DATABASE_URL is not set. Configure Turso for production deployments.");
+    // Serverless hosts usually have a read-only filesystem, so the local SQLite fallback is dev-only.
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("DATABASE_URL is not set. Configure a remote libSQL database for production deployments.");
     }
     const dir = path.join(process.cwd(), ".data");
     mkdirSync(dir, { recursive: true });
