@@ -7,5 +7,6 @@ export function isValidPhone(phone: string): boolean {
 }
 
 export function isValidName(name: string): boolean {
-  return name.trim().length >= 2;
+  const length = name.trim().length;
+  return length >= 2 && length <= 60;
 }

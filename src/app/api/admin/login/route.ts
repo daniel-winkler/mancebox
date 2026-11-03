@@ -1,4 +1,4 @@
-import { getAdminPassword, setAdminCookie } from "@/lib/admin";
+import { getAdminPassword, safeEqual, setAdminCookie } from "@/lib/admin";
 import { getAdminSchedule } from "@/lib/db";
 import { readJson } from "@/lib/api";
 
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     );
   }
   const body = await readJson<{ password?: string }>(request);
-  if ((body.password ?? "") !== password) {
+  if (typeof body.password !== "string" || !safeEqual(body.password, password)) {
     return Response.json({ error: "Contraseña incorrecta." }, { status: 401 });
   }
   await setAdminCookie(password);

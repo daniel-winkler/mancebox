@@ -6,6 +6,10 @@ const FORM_PATH = "/acceso";
 
 function noIndex(response: NextResponse) {
   response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  // Basic hardening: no framing (clickjacking), no MIME sniffing, no URLs leaked via Referer.
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "no-referrer");
   return response;
 }
 
