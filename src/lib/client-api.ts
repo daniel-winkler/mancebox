@@ -94,12 +94,12 @@ export function createRoom(title: string) {
   );
 }
 
-export function createSlot(label: string, time: string, place: string) {
+export function createSlot(label: string, time: string, place: string, capacity: number) {
   return parse<AdminPayload>(
     fetch("/api/admin/slots", {
       method: "POST",
       headers: jsonHeaders,
-      body: JSON.stringify({ label, time, place }),
+      body: JSON.stringify({ label, time, place, capacity }),
     }),
   );
 }

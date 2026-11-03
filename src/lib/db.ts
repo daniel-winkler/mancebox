@@ -271,7 +271,7 @@ export async function createRoom(title: string) {
   }
 }
 
-export async function addSlot(label: string, time: string, place: string) {
+export async function addSlot(label: string, time: string, place: string, capacity = DEFAULT_CAPACITY) {
   const client = await db();
   const txn = await client.transaction("write");
   try {
@@ -283,7 +283,7 @@ export async function addSlot(label: string, time: string, place: string) {
     const rs = await exec(
       txn,
       `INSERT INTO slots (room_id, label, time, place, capacity) VALUES (?, ?, ?, ?, ?)`,
-      [room.id, label, time, place, DEFAULT_CAPACITY],
+      [room.id, label, time, place, capacity],
     );
     await txn.commit();
     return { id: Number(rs.lastInsertRowid) };

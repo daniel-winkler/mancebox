@@ -49,6 +49,7 @@ export default function App() {
   const [slotDay, setSlotDay] = useState("");
   const [slotTime, setSlotTime] = useState("18:00");
   const [slotPlace, setSlotPlace] = useState("");
+  const [slotCapacity, setSlotCapacity] = useState("15");
 
   const ready = hasProfile(profile);
 
@@ -196,10 +197,11 @@ export default function App() {
   async function saveSlot(event: FormEvent) {
     event.preventDefault();
     await withBusy(async () => {
-      const data = await createSlot(slotDay, slotTime, slotPlace);
+      const data = await createSlot(slotDay, slotTime, slotPlace, Number(slotCapacity));
       setAdmin(data);
       setSlotDay("");
       setSlotPlace("");
+      setSlotCapacity("15");
       setShowNewSlot(false);
       await load(profile.phone);
       setNotice("Sesión añadida al plan activo.");
@@ -326,7 +328,7 @@ export default function App() {
               <button className="btn" disabled={busy}>
                 Guardar mis datos
               </button>
-              <p className="small">
+              <p className="small hint">
                 El teléfono es tu identificador. Si cambias de dispositivo, tendrás que volver a
                 introducirlo.
               </p>
@@ -346,12 +348,14 @@ export default function App() {
               slotDay={slotDay}
               slotTime={slotTime}
               slotPlace={slotPlace}
+              slotCapacity={slotCapacity}
               setShowNewRoom={setShowNewRoom}
               setShowNewSlot={setShowNewSlot}
               setRoomTitle={setRoomTitle}
               setSlotDay={setSlotDay}
               setSlotTime={setSlotTime}
               setSlotPlace={setSlotPlace}
+              setSlotCapacity={setSlotCapacity}
               onSaveRoom={saveRoom}
               onSaveSlot={saveSlot}
               onPassOffer={passOffer}
@@ -368,13 +372,7 @@ export default function App() {
               <label className="field" htmlFor="password">
                 Contraseña de administrador
               </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Contraseña"
-              />
+              <PasswordInput id="password" value={password} onChange={setPassword} />
               <button className="btn" disabled={busy}>
                 Acceder
               </button>
@@ -383,6 +381,28 @@ export default function App() {
       </section>
       <footer className="footer">MANCEBOX · Reserva tu entrenamiento</footer>
     </main>
+  );
+}
+
+function PasswordInput({ id, value, onChange }: { id: string; value: string; onChange: (v: string) => void }) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className="password-field">
+      <input id={id} type={visible ? "text" : "password"} value={value} onChange={(e) => onChange(e.target.value)} />
+      <button
+        className="password-toggle"
+        type="button"
+        aria-label={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
+        aria-pressed={visible}
+        onClick={() => setVisible(!visible)}
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+          <circle cx="12" cy="12" r="3" />
+          {visible && <path d="M3 3l18 18" />}
+        </svg>
+      </button>
+    </div>
   );
 }
 
@@ -685,12 +705,14 @@ function AdminView({
   slotDay,
   slotTime,
   slotPlace,
+  slotCapacity,
   setShowNewRoom,
   setShowNewSlot,
   setRoomTitle,
   setSlotDay,
   setSlotTime,
   setSlotPlace,
+  setSlotCapacity,
   onSaveRoom,
   onSaveSlot,
   onPassOffer,
@@ -705,12 +727,14 @@ function AdminView({
   slotDay: string;
   slotTime: string;
   slotPlace: string;
+  slotCapacity: string;
   setShowNewRoom: (v: boolean) => void;
   setShowNewSlot: (v: boolean) => void;
   setRoomTitle: (v: string) => void;
   setSlotDay: (v: string) => void;
   setSlotTime: (v: string) => void;
   setSlotPlace: (v: string) => void;
+  setSlotCapacity: (v: string) => void;
   onSaveRoom: (event: FormEvent) => void;
   onSaveSlot: (event: FormEvent) => void;
   onPassOffer: (slotId: number) => void;
@@ -771,7 +795,6 @@ function AdminView({
                 setRoomTitle(e.target.value);
                 setConfirmReplace(false);
               }}
-              placeholder="Nombre de la semana"
             />
             {confirmReplace && admin.room ? (
               <div className="confirm">
@@ -799,7 +822,7 @@ function AdminView({
                 <button className="btn" disabled={busy}>
                   Guardar plan
                 </button>
-                <p className="small">El nuevo plan sustituye al anterior como semana visible.</p>
+                <p className="small hint">El nuevo plan sustituye al anterior como semana visible.</p>
               </>
             )}
           </form>
@@ -847,12 +870,28 @@ function AdminView({
               id="slotDay"
               value={slotDay}
               onChange={(e) => setSlotDay(e.target.value)}
-              placeholder="Ej. Sábado 14 noviembre"
             />
-            <label className="field" htmlFor="slotTime">
-              Hora
-            </label>
-            <input id="slotTime" type="time" value={slotTime} onChange={(e) => setSlotTime(e.target.value)} />
+            <div className="field-row">
+              <div>
+                <label className="field" htmlFor="slotTime">
+                  Hora
+                </label>
+                <input id="slotTime" type="time" value={slotTime} onChange={(e) => setSlotTime(e.target.value)} />
+              </div>
+              <div>
+                <label className="field" htmlFor="slotCapacity">
+                  Plazas
+                </label>
+                <input
+                  id="slotCapacity"
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={slotCapacity}
+                  onChange={(e) => setSlotCapacity(e.target.value)}
+                />
+              </div>
+            </div>
             <label className="field" htmlFor="slotPlace">
               Lugar
             </label>
@@ -860,7 +899,6 @@ function AdminView({
               id="slotPlace"
               value={slotPlace}
               onChange={(e) => setSlotPlace(e.target.value)}
-              placeholder="Lugar de entrenamiento"
             />
             <button className="btn" disabled={busy}>
               Crear sesión
