@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type Dispatch, type FormEvent, type SetStateAction } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import {
   acceptOffer,
   adminLogin,
@@ -20,6 +20,9 @@ import { hasProfile, loadProfile, saveProfile, type Profile } from "@/lib/profil
 import type { AdminSlot, PublicSlot } from "@/lib/types";
 
 type Tab = "schedule" | "bookings" | "profile";
+
+const POLL_MS = 10_000;
+const IDLE_MS = 5 * 60_000;
 
 function occupied(slot: PublicSlot) {
   return slot.confirmedCount + slot.offeredCount;
@@ -75,7 +78,56 @@ export default function App() {
     }
   }, [load]);
 
+  // Live refresh: re-fetch every few seconds while the tab is visible and the user has been
+  // active recently, and right away when they come back (tab visible again or first
+  // interaction after being idle). Results are dropped if an action ran meanwhile, so a
+  // stale poll never overwrites fresher data.
+  const busyRef = useRef(false);
+  const actionSeq = useRef(0);
+  const pollAdmin = adminMode && admin.admin;
+  useEffect(() => {
+    let lastActive = Date.now();
+    const idle = () => Date.now() - lastActive > IDLE_MS;
+
+    async function refresh() {
+      if (document.hidden || busyRef.current || idle()) return;
+      const seq = actionSeq.current;
+      try {
+        if (pollAdmin) {
+          const data = await fetchAdminSession();
+          if (seq === actionSeq.current) setAdmin(data);
+        } else {
+          const data = await fetchSchedule(profile.phone);
+          if (seq === actionSeq.current) setSchedule(data);
+        }
+      } catch {
+        // Ignore transient errors; the next tick retries.
+      }
+    }
+    const timer = setInterval(refresh, POLL_MS);
+    const onActivity = () => {
+      const wasIdle = idle();
+      lastActive = Date.now();
+      if (wasIdle) void refresh();
+    };
+    const onVisible = () => {
+      if (document.hidden) return;
+      lastActive = Date.now();
+      void refresh();
+    };
+    const activityEvents = ["pointerdown", "pointermove", "keydown", "scroll"] as const;
+    for (const name of activityEvents) window.addEventListener(name, onActivity, { passive: true });
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(timer);
+      for (const name of activityEvents) window.removeEventListener(name, onActivity);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [pollAdmin, profile.phone]);
+
   async function withBusy(fn: () => Promise<void>) {
+    busyRef.current = true;
+    actionSeq.current++;
     setBusy(true);
     setError("");
     try {
@@ -83,6 +135,7 @@ export default function App() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ha ocurrido un error.");
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
   }
@@ -501,9 +554,7 @@ function SlotCard({
       {slot.confirmedNames.length > 0 && (
         <>
           <button className="link" type="button" onClick={onToggleParticipants}>
-            {openParticipants
-              ? "Ocultar participantes"
-              : `Ver participantes (${slot.confirmedNames.length})`}
+            {openParticipants ? "Ocultar participantes" : "Ver participantes"}
           </button>
           {openParticipants && (
             <div className="waitlist participants">
