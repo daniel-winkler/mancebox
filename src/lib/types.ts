@@ -16,16 +16,6 @@ export type Slot = {
   capacity: number;
 };
 
-export type Booking = {
-  id: number;
-  slot_id: number;
-  name: string;
-  phone: string;
-  status: BookingStatus;
-  position: number | null;
-  created_at: string;
-};
-
 export type WaitlistEntry = {
   name: string;
   position: number;
